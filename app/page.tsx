@@ -17,6 +17,14 @@ type ExperienceItem = {
   bullets: string[];
 };
 
+type StudyItem = {
+  degree: string;
+  org: string;
+  location: string;
+  time: string;
+  highlights: string[];
+};
+
 const projects: Project[] = [
   {
     metric: "Network Analysis",
@@ -34,6 +42,20 @@ const projects: Project[] = [
     linkText: "GitHub",
     link: "https://github.com/KArthick707/DYNAMIC-MALWARE-ANALYSIS-USING-MACHINE-LEARING-AND-FEATURE-EXTRACTION",
   },
+];
+
+const studies: StudyItem[] = [
+  {
+    degree: "Master's in Information Technology",
+    org: "SRH Hochschule Heidelberg",
+    location: "Heidelberg, Germany",
+    time: "2023 – 2025",
+    highlights: [
+      "Focus: Machine learning, cybersecurity, systems, and applied research.",
+      "Thesis: Dynamic Malware Classification using ML (hybrid CNN/LSTM/RF).",
+    ],
+  },
+
 ];
 
 const experience: ExperienceItem[] = [
@@ -235,7 +257,8 @@ export default function Page() {
                     support-first • security-minded • documentation-driven
                   </div>
                   <div>
-                    <span className="text-emerald-300">$</span> echo "reduce risk, keep systems usable"
+                    <span className="text-emerald-300">$</span>{" "}
+                    echo "reduce risk, keep systems usable"
                   </div>
                   <div className="text-white/60">reduce risk, keep systems usable</div>
                 </div>
@@ -247,6 +270,13 @@ export default function Page() {
                   className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black hover:opacity-90"
                 >
                   Jump to Projects
+                </a>
+
+                <a
+                  href="#studies"
+                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  Jump to Studies
                 </a>
 
                 <a
@@ -331,6 +361,42 @@ export default function Page() {
                       >
                         {p.linkText} <span className="text-white/40">→</span>
                       </a>
+                    </div>
+                  ))}
+                </div>
+              </Panel>
+            </section>
+
+            {/* STUDIES */}
+            <section id="studies" className="group">
+              <Panel>
+                <SectionTitle title="Studies" hint="Education and academic focus." />
+                <div className="mt-5 space-y-4">
+                  {studies.map((s) => (
+                    <div
+                      key={s.degree + s.org}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-white/20 hover:bg-white/[0.08] transition"
+                    >
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <div>
+                          <div className="text-base font-semibold">{s.degree}</div>
+                          <div className="text-sm text-white/60">
+                            {s.org} • {s.location}
+                          </div>
+                        </div>
+                        <div className="text-xs text-white/50">{s.time}</div>
+                      </div>
+
+                      {s.highlights?.length ? (
+                        <ul className="mt-4 space-y-2 text-sm text-white/70">
+                          {s.highlights.map((h) => (
+                            <li key={h} className="flex gap-2">
+                              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300/80" />
+                              <span>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
                   ))}
                 </div>
