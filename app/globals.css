@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+@keyframes scan {
+  0% { transform: translateY(-20%); }
+  100% { transform: translateY(20%); }
+}
+
+@keyframes gridDrift {
+  0% { transform: translate(0px, 0px); }
+  100% { transform: translate(-60px, 30px); }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-20%); }
+  100% { transform: translateY(20%); }
+}
+
+@keyframes gridDrift {
+  0% { transform: translate(0px, 0px); }
+  100% { transform: translate(-60px, 30px); }
+}
+
+/* Glitch */
+.glitch {
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 0 20px rgba(34,211,238,0.18);
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glitch::before {
+  transform: translate(-2px, 0);
+  color: rgba(34, 211, 238, 0.75);
+  animation: glitchTop 2.2s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  transform: translate(2px, 0);
+  color: rgba(217, 70, 239, 0.55);
+  animation: glitchBottom 1.9s infinite linear alternate-reverse;
+}
+
+@keyframes glitchTop {
+  0% { clip-path: inset(0 0 85% 0); }
+  15% { clip-path: inset(0 0 65% 0); }
+  30% { clip-path: inset(0 0 90% 0); }
+  45% { clip-path: inset(0 0 55% 0); }
+  60% { clip-path: inset(0 0 88% 0); }
+  75% { clip-path: inset(0 0 62% 0); }
+  100% { clip-path: inset(0 0 86% 0); }
+}
+
+@keyframes glitchBottom {
+  0% { clip-path: inset(85% 0 0 0); }
+  15% { clip-path: inset(68% 0 0 0); }
+  30% { clip-path: inset(92% 0 0 0); }
+  45% { clip-path: inset(60% 0 0 0); }
+  60% { clip-path: inset(90% 0 0 0); }
+  75% { clip-path: inset(66% 0 0 0); }
+  100% { clip-path: inset(86% 0 0 0); }
+}
