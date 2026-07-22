@@ -1,4 +1,22 @@
-import Navbar from "@/NavBar Compnents/Navbar";
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Mail,
+  ChevronDown,
+  ArrowUpRight,
+  Download,
+  Network,
+  Brain,
+  ShieldCheck,
+  LifeBuoy,
+  Wifi,
+  Wrench,
+  FileText,
+  Newspaper,
+} from "lucide-react";
+import Navbar from "./components/Navbar";
+import { GithubIcon, LinkedinIcon } from "./components/BrandIcons";
 
 type Project = {
   title: string;
@@ -7,6 +25,7 @@ type Project = {
   tags: string[];
   linkText: string;
   link: string;
+  icon: ReactNode;
 };
 
 type ExperienceItem = {
@@ -25,6 +44,12 @@ type StudyItem = {
   highlights: string[];
 };
 
+const rotatingTexts = [
+  "Reduce risk, keep systems usable",
+  "1st/2nd line IT support, security-minded",
+  "M.Sc. in IT — Machine Learning & Cybersecurity, SRH Heidelberg",
+];
+
 const projects: Project[] = [
   {
     metric: "Network Analysis",
@@ -32,7 +57,8 @@ const projects: Project[] = [
     desc: "Diagnosed Dante AV audio dropouts through deep packet inspection. Found congestion, multicast flooding, and PTP sync issues; recommended VLAN segmentation, IGMP snooping, and QoS plus a long-term monitoring approach.",
     tags: ["Wireshark", "Multicast", "PTP", "VLAN", "IGMP Snooping", "QoS"],
     linkText: "View Report",
-    link: "#", // replace with your report link
+    link: "#", // TODO: add a link to the write-up/report for this project
+    icon: <Network className="w-5 h-5" />,
   },
   {
     metric: "Research / ML Security",
@@ -41,6 +67,7 @@ const projects: Project[] = [
     tags: ["Python", "ML", "TF-IDF", "CNN/LSTM", "Random Forest"],
     linkText: "GitHub",
     link: "https://github.com/KArthick707/DYNAMIC-MALWARE-ANALYSIS-USING-MACHINE-LEARING-AND-FEATURE-EXTRACTION",
+    icon: <Brain className="w-5 h-5" />,
   },
 ];
 
@@ -55,7 +82,6 @@ const studies: StudyItem[] = [
       "Thesis: Dynamic Malware Classification using ML (hybrid CNN/LSTM/RF).",
     ],
   },
-
 ];
 
 const experience: ExperienceItem[] = [
@@ -99,431 +125,429 @@ const experience: ExperienceItem[] = [
   },
 ];
 
-const skills = {
-  "Security & Compliance": [
-    "Email security (phishing reduction)",
-    "Vendor risk due diligence",
-    "ISO 27001 / SOC 2 review",
-    "GDPR awareness",
-    "Documentation & policy basics",
-  ],
-  "IT Support": [
-    "1st/2nd line support",
-    "Windows & macOS troubleshooting",
-    "Ticketing systems & SLAs",
-    "Device provisioning (onboarding/offboarding)",
-    "Printer & endpoint support",
-  ],
-  Networking: ["LAN / Wi-Fi basics", "DHCP/DNS fundamentals", "Connectivity troubleshooting"],
-  "Tools & Platforms": ["Microsoft 365 / Office 365", "VMware (basics)", "Python (scripting)"],
+const skills: Record<string, { icon: ReactNode; items: string[] }> = {
+  "Security & Compliance": {
+    icon: <ShieldCheck className="w-5 h-5 text-red-400" />,
+    items: [
+      "Email security (phishing reduction)",
+      "Vendor risk due diligence",
+      "ISO 27001 / SOC 2 review",
+      "GDPR awareness",
+      "Documentation & policy basics",
+    ],
+  },
+  "IT Support": {
+    icon: <LifeBuoy className="w-5 h-5 text-red-400" />,
+    items: [
+      "1st/2nd line support",
+      "Windows & macOS troubleshooting",
+      "Ticketing systems & SLAs",
+      "Device provisioning (onboarding/offboarding)",
+      "Printer & endpoint support",
+    ],
+  },
+  Networking: {
+    icon: <Wifi className="w-5 h-5 text-red-400" />,
+    items: ["LAN / Wi-Fi basics", "DHCP/DNS fundamentals", "Connectivity troubleshooting"],
+  },
+  "Tools & Platforms": {
+    icon: <Wrench className="w-5 h-5 text-red-400" />,
+    items: ["Microsoft 365 / Office 365", "VMware (basics)", "Python (scripting)"],
+  },
 };
 
-function Badge({ text }: { text: string }) {
+export default function Portfolio() {
+  const [activeSection, setActiveSection] = useState("home");
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set(["home"]));
+  const [rotatingTextIndex, setRotatingTextIndex] = useState(0);
+  const [isTextVisible, setIsTextVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0);
+
+      const sections = ["home", "projects", "experience", "skills", "contact"];
+      const current = sections.find((section) => {
+        const el = document.getElementById(section);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      if (current) setActiveSection(current);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    const sections = document.querySelectorAll("section[id]");
+    sections.forEach((section) => observer.observe(section));
+    return () => sections.forEach((section) => observer.unobserve(section));
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTextVisible(false);
+      setTimeout(() => {
+        setRotatingTextIndex((prev) => (prev + 1) % rotatingTexts.length);
+        setIsTextVisible(true);
+      }, 400);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-      {text}
-    </span>
-  );
-}
+    <div className="min-h-screen bg-[#050507] text-zinc-200 relative overflow-x-hidden">
+      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
 
-function Chip({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100/90">
-      <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.9)]" />
-      {label}
-    </span>
-  );
-}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(700px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(239, 68, 68, 0.035), transparent 40%)`,
+        }}
+      />
 
-function Panel({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={
-        "relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0f16]/70 p-5 backdrop-blur " +
-        "shadow-[0_0_0_1px_rgba(255,255,255,0.02)] " +
-        "before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_55%)] before:opacity-80 " +
-        className
-      }
-    >
-      {children}
-      <div className="pointer-events-none absolute -inset-10 opacity-0 blur-3xl transition duration-500 group-hover:opacity-100 bg-[radial-gradient(circle,rgba(217,70,239,0.14),transparent_60%)]" />
-    </div>
-  );
-}
+      <Navbar activeSection={activeSection} />
 
-function SectionTitle({ title, hint }: { title: string; hint?: string }) {
-  return (
-    <div className="flex items-end justify-between gap-3">
-      <div>
-        <div className="text-xs text-white/45">SYSTEM</div>
-        <h2 className="mt-1 text-xl font-semibold tracking-tight">{title}</h2>
-        {hint ? <p className="mt-2 text-sm text-white/60">{hint}</p> : null}
-      </div>
-      <div className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60 md:flex">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-        operational
-      </div>
-    </div>
-  );
-}
-
-function Glitch({ text }: { text: string }) {
-  return (
-    <span className="glitch inline-block" data-text={text}>
-      {text}
-    </span>
-  );
-}
-
-export default function Page() {
-  return (
-    <div className="min-h-screen bg-[#05060a] text-white">
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* neon haze */}
-        <div className="absolute -top-52 left-1/2 h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-cyan-500/14 blur-3xl" />
-        <div className="absolute right-[-220px] top-[12%] h-[520px] w-[520px] rounded-full bg-fuchsia-500/12 blur-3xl" />
-        <div className="absolute bottom-[-260px] left-[-220px] h-[520px] w-[520px] rounded-full bg-emerald-500/10 blur-3xl" />
-
-        {/* cyber grid */}
-        <div className="absolute inset-0 opacity-[0.16] bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:30px_30px]" />
-        <div className="absolute inset-0 opacity-[0.10] animate-[gridDrift_18s_linear_infinite] bg-[linear-gradient(to_right,rgba(34,211,238,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(217,70,239,0.10)_1px,transparent_1px)] [background-size:90px_90px]" />
-
-        {/* scanline */}
-        <div className="absolute inset-0 opacity-[0.08] animate-[scan_6s_linear_infinite] [background:repeating-linear-gradient(to_bottom,transparent_0px,transparent_7px,rgba(255,255,255,0.26)_8px)]" />
-
-        {/* vignette */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/60" />
-      </div>
-
-      <Navbar />
-
-      {/* content above background for clickable links */}
-      <main className="relative z-10 mx-auto max-w-6xl px-4 pb-14 pt-10">
-        {/* Top status bar */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-            <span className="text-sm text-white/80">
-              status: <span className="text-emerald-200">connected</span>
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Chip label="Heidelberg" />
-            <Chip label="IT Support & Security" />
-            <Chip label="Cybersecurity" />
-          </div>
-        </div>
-
-        {/* Dashboard grid */}
-        <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-          {/* LEFT: Profile panel */}
-          <div className="lg:sticky lg:top-20 lg:self-start">
-            <Panel className="group">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-xs text-white/45">IDENTITY</div>
-                  <div className="mt-1 text-2xl font-semibold">
-                    <Glitch text="Karthick" />{" "}
-                    <span className="text-white/80">Ganapathy</span>
-                  </div>
-                  <div className="mt-2 text-sm text-white/65">
-                    IT Support & Security Professional • Cybersecurity Enthusiast
-                  </div>
-                </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60">
-                  v1.0
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-white/10 bg-black/40 p-4 font-mono text-xs text-white/70">
-                <div className="flex items-center gap-2 text-white/45">
-                  <span className="h-2 w-2 rounded-full bg-red-400/70" />
-                  <span className="h-2 w-2 rounded-full bg-yellow-400/70" />
-                  <span className="h-2 w-2 rounded-full bg-emerald-400/70" />
-                  <span className="ml-2">security-console</span>
-                </div>
-                <div className="mt-3 space-y-1">
-                  <div>
-                    <span className="text-emerald-300">$</span> whoami
-                  </div>
-                  <div className="text-white/60">
-                    support-first • security-minded • documentation-driven
-                  </div>
-                  <div>
-                    <span className="text-emerald-300">$</span>{" "}
-                    echo "reduce risk, keep systems usable"
-                  </div>
-                  <div className="text-white/60">reduce risk, keep systems usable</div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3">
-                <a
-                  href="#projects"
-                  className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black hover:opacity-90"
-                >
-                  Jump to Projects
-                </a>
-
-                <a
-                  href="#studies"
-                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
-                >
-                  Jump to Studies
-                </a>
-
-                <a
-                  href="#experience"
-                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
-                >
-                  Jump to Experience
-                </a>
-
-                <a
-                  href="#contact"
-                  className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-200 hover:bg-cyan-400/20"
-                >
-                  Contact
-                </a>
-              </div>
-
-              <div className="mt-5 text-xs text-white/45">
-                Location: <span className="text-white/70">Heidelberg, Germany</span>
-              </div>
-            </Panel>
+      {/* Hero */}
+      <section id="home" className="min-h-screen flex items-center justify-center relative pt-24 pb-12 md:pt-20 md:pb-0 glow-section">
+        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+          <div className={`mb-4 md:mb-8 ${visibleSections.has("home") ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-3 px-6 py-3 glass-card rounded-full">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-zinc-300 text-sm tracking-widest uppercase font-medium">
+                IT Support & Security
+              </span>
+            </div>
           </div>
 
-          {/* RIGHT: Sections */}
-          <div className="space-y-6">
-            {/* ABOUT (new layout, same meaning) */}
-            <section className="group" id="home">
-              <Panel>
-                <SectionTitle
-                  title="Profile Summary"
-                  hint="Reliable user support + practical security improvements."
-                />
-                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/70">
-                  IT Support & Security Professional focused on delivering stable, user-friendly
-                  support while strengthening security and compliance. Experience includes Microsoft
-                  365 administration, LAN/Wi-Fi troubleshooting, and vendor security reviews aligned
-                  with ISO 27001, SOC 2, and GDPR.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge text="Windows/macOS" />
-                  <Badge text="Microsoft 365" />
-                  <Badge text="Networking (LAN/Wi-Fi)" />
-                  <Badge text="Vendor Risk" />
-                  <Badge text="Documentation" />
-                </div>
-              </Panel>
-            </section>
+          <h1
+            className={`text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight mb-4 md:mb-8 ${
+              visibleSections.has("home") ? "animate-slide-up delay-100" : "opacity-0"
+            }`}
+          >
+            <span className="name-hover">Karthick Ganapathy</span>
+          </h1>
 
-            {/* PROJECTS */}
-            <section id="projects" className="group">
-              <Panel>
-                <SectionTitle title="Projects" hint="Selected technical work." />
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  {projects.map((p) => (
-                    <div
-                      key={p.title}
-                      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:border-white/20 hover:bg-white/[0.08]"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="text-xs text-white/45">{p.metric}</div>
-                          <div className="mt-1 text-base font-semibold">{p.title}</div>
-                        </div>
-                        <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/70">
-                          active
-                        </span>
-                      </div>
+          <p
+            className={`text-lg sm:text-xl md:text-2xl text-zinc-400 mb-4 md:mb-6 font-light tracking-wide ${
+              visibleSections.has("home") ? "animate-slide-up delay-300" : "opacity-0"
+            }`}
+          >
+            <span className="text-zinc-200 font-semibold">IT Support</span> &{" "}
+            <span className="text-zinc-200 font-semibold">Security Professional</span>
+          </p>
 
-                      <p className="mt-3 text-sm text-white/70">{p.desc}</p>
+          <div className={`mb-6 md:mb-12 h-10 ${visibleSections.has("home") ? "animate-slide-up delay-400" : "opacity-0"}`}>
+            <p
+              className={`text-xl md:text-2xl text-zinc-100 font-bold transition-all duration-500 ${
+                isTextVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+              }`}
+            >
+              {rotatingTexts[rotatingTextIndex]}
+            </p>
+          </div>
 
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {p.tags.map((t) => (
-                          <Badge key={t} text={t} />
-                        ))}
-                      </div>
+          <div
+            className={`flex flex-col sm:flex-row gap-4 justify-center mb-8 md:mb-16 ${
+              visibleSections.has("home") ? "animate-slide-up delay-500" : "opacity-0"
+            }`}
+          >
+            <a href="mailto:karthick.ganapathy2104@gmail.com" className="btn-red px-10 py-4 rounded-full text-sm uppercase tracking-wider">
+              Get In Touch
+            </a>
+            <a href="#projects" className="btn-blue px-10 py-4 rounded-full text-sm uppercase tracking-wider">
+              View Projects
+            </a>
+            <a
+              href="/resume.pdf"
+              download="Karthick-Ganapathy-Resume.pdf"
+              className="btn-ghost px-10 py-4 rounded-full text-sm uppercase tracking-wider inline-flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Resume
+            </a>
+          </div>
 
-                      <a
-                        href={p.link || "#"}
-                        target={p.link?.startsWith("http") ? "_blank" : undefined}
-                        rel={p.link?.startsWith("http") ? "noreferrer" : undefined}
-                        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-200 hover:text-cyan-100"
-                      >
-                        {p.linkText} <span className="text-white/40">→</span>
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            </section>
+          <div className={`flex gap-5 justify-center ${visibleSections.has("home") ? "animate-slide-up delay-600" : "opacity-0"}`}>
+            {[
+              { icon: <LinkedinIcon className="w-5 h-5" />, href: "https://www.linkedin.com/in/karthick-ganapathy/" },
+              { icon: <GithubIcon className="w-5 h-5" />, href: "https://github.com/KArthick707" },
+              { icon: <Mail className="w-5 h-5" />, href: "mailto:karthick.ganapathy2104@gmail.com" },
+            ].map((social, idx) => (
+              <a
+                key={idx}
+                href={social.href}
+                target={social.href.startsWith("http") ? "_blank" : undefined}
+                rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="social-icon w-14 h-14 flex items-center justify-center rounded-full"
+              >
+                {social.icon}
+              </a>
+            ))}
+          </div>
 
-            {/* STUDIES */}
-            <section id="studies" className="group">
-              <Panel>
-                <SectionTitle title="Studies" hint="Education and academic focus." />
-                <div className="mt-5 space-y-4">
-                  {studies.map((s) => (
-                    <div
-                      key={s.degree + s.org}
-                      className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-white/20 hover:bg-white/[0.08] transition"
-                    >
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <div>
-                          <div className="text-base font-semibold">{s.degree}</div>
-                          <div className="text-sm text-white/60">
-                            {s.org} • {s.location}
-                          </div>
-                        </div>
-                        <div className="text-xs text-white/50">{s.time}</div>
-                      </div>
-
-                      {s.highlights?.length ? (
-                        <ul className="mt-4 space-y-2 text-sm text-white/70">
-                          {s.highlights.map((h) => (
-                            <li key={h} className="flex gap-2">
-                              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300/80" />
-                              <span>{h}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            </section>
-
-            {/* EXPERIENCE */}
-            <section id="experience" className="group">
-              <Panel>
-                <SectionTitle title="Experience" hint="Roles and impact." />
-                <div className="mt-5 space-y-4">
-                  {experience.map((e) => (
-                    <div
-                      key={e.role + e.org}
-                      className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-white/20 hover:bg-white/[0.08] transition"
-                    >
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <div>
-                          <div className="text-base font-semibold">{e.role}</div>
-                          <div className="text-sm text-white/60">
-                            {e.org} • {e.location}
-                          </div>
-                        </div>
-                        <div className="text-xs text-white/50">{e.time}</div>
-                      </div>
-
-                      <ul className="mt-4 space-y-2 text-sm text-white/70">
-                        {e.bullets.length ? (
-                          e.bullets.map((b) => (
-                            <li key={b} className="flex gap-2">
-                              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300/80" />
-                              <span>{b}</span>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-white/55">(Details available on request)</li>
-                        )}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            </section>
-
-            {/* SKILLS */}
-            <section id="skills" className="group">
-              <Panel>
-                <SectionTitle title="Skills" hint="Core strengths." />
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  {Object.entries(skills).map(([groupName, items]) => (
-                    <div key={groupName} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                      <div className="text-sm font-semibold text-white/90">{groupName}</div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {items.map((s) => (
-                          <Badge key={s} text={s} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            </section>
-
-            {/* CONTACT */}
-            <section id="contact" className="group">
-              <Panel>
-                <SectionTitle title="Contact" hint="Reach out quickly." />
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <div className="text-sm font-semibold">Quick links</div>
-                    <div className="mt-4 space-y-3 text-sm">
-                      <a
-                        className="block text-cyan-200 hover:text-cyan-100"
-                        href="mailto:karthick.ganapathy2104@gmail.com"
-                      >
-                        karthick.ganapathy2104@gmail.com →
-                      </a>
-                      <a
-                        className="block text-cyan-200 hover:text-cyan-100"
-                        href="https://www.linkedin.com/in/karthick-ganapathy/"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        LinkedIn →
-                      </a>
-                      <a
-                        className="block text-cyan-200 hover:text-cyan-100"
-                        href="https://github.com/KArthick707"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        GitHub →
-                      </a>
-                      <a
-                        className="block text-cyan-200 hover:text-cyan-100"
-                        href="https://medium.com/@karthickg070"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Medium Blog →
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <div className="text-sm font-semibold">One-liner</div>
-                    <p className="mt-2 text-sm text-white/70">
-                      Reliable support and practical security improvements.
-                    </p>
-
-                    <a
-                      href="mailto:karthick.ganapathy2104@gmail.com?subject=Portfolio%20Contact"
-                      className="mt-5 inline-block rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black hover:opacity-90"
-                    >
-                      Email me
-                    </a>
-                  </div>
-                </div>
-              </Panel>
-            </section>
-
-            <footer className="py-10 text-center text-xs text-white/50">
-              © {new Date().getFullYear()} • Karthick Ganapathy • Next.js & Tailwind
-            </footer>
+          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 hidden md:block">
+            <ChevronDown className="w-8 h-8 text-red-400/60 animate-bounce" />
           </div>
         </div>
-      </main>
+      </section>
+
+      <div className="gradient-divider-thick" />
+
+      {/* Projects */}
+      <section id="projects" className="py-32 px-6 relative glow-section">
+        <div className="max-w-6xl mx-auto">
+          <div className={`text-center mb-20 ${visibleSections.has("projects") ? "animate-slide-up" : "opacity-0"}`}>
+            <p className="kicker-label text-sm tracking-widest uppercase mb-4 font-semibold">Portfolio</p>
+            <h2 className="text-4xl md:text-6xl font-bold section-heading">Featured Projects</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {projects.map((project, idx) => (
+              <div
+                key={project.title}
+                className={`project-card rounded-2xl p-6 ${visibleSections.has("projects") ? "animate-slide-up" : "opacity-0"}`}
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="icon-box w-12 h-12 rounded-xl flex items-center justify-center text-red-400">
+                    {project.icon}
+                  </div>
+                  <span className="text-xs text-red-300 px-3 py-1.5 bg-red-500/10 rounded-full border border-red-500/20 font-semibold">
+                    {project.metric}
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-bold mb-3 text-zinc-100">{project.title}</h3>
+                <p className="text-zinc-400 mb-5 text-sm leading-relaxed">{project.desc}</p>
+
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {project.tags.map((tech) => (
+                    <span key={tech} className="tech-tag text-xs px-3 py-1.5 rounded-full">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                {project.link !== "#" && (
+                  <a
+                    href={project.link}
+                    target={project.link.startsWith("http") ? "_blank" : undefined}
+                    rel={project.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className="project-link text-sm"
+                  >
+                    {project.linkText} <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="gradient-divider-thick" />
+
+      {/* Experience */}
+      <section id="experience" className="py-32 px-6 relative glow-section-blue">
+        <div className="max-w-6xl mx-auto relative">
+          <div className={`text-center mb-20 ${visibleSections.has("experience") ? "animate-slide-up" : "opacity-0"}`}>
+            <p className="kicker-label text-sm tracking-widest uppercase mb-4 font-semibold">Career</p>
+            <h2 className="text-4xl md:text-6xl font-bold section-heading">Experience</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {experience.map((exp, idx) => (
+              <div
+                key={exp.role + exp.org}
+                className={`experience-card rounded-2xl p-8 shadow-lg ${
+                  visibleSections.has("experience") ? "animate-slide-up" : "opacity-0"
+                }`}
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
+                <div className="flex flex-col mb-6">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-bold gradient-red">{exp.role}</h3>
+                    <p className="text-lg text-zinc-300 font-semibold">{exp.org}</p>
+                    <p className="text-sm text-zinc-500">{exp.location}</p>
+                  </div>
+                  <span className="text-zinc-400 mt-2 text-sm tracking-wider bg-white/5 px-4 py-2 rounded-full font-medium w-fit">
+                    {exp.time}
+                  </span>
+                </div>
+
+                <ul className="space-y-3">
+                  {exp.bullets.map((bullet) => (
+                    <li key={bullet} className="flex items-start gap-4 text-zinc-400 group">
+                      <span className="text-red-400 mt-1.5 text-sm font-bold">●</span>
+                      <span className="text-sm leading-relaxed group-hover:text-zinc-200 transition-colors">{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Education */}
+          <div
+            className={`mt-12 experience-card rounded-2xl p-8 shadow-lg ${
+              visibleSections.has("experience") ? "animate-slide-up delay-300" : "opacity-0"
+            }`}
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <div className="icon-box p-3 rounded-xl">
+                <FileText className="w-6 h-6 text-blue-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-red-400">Education</h3>
+            </div>
+
+            {studies.map((study) => (
+              <div key={study.degree}>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                  <div>
+                    <h4 className="text-xl font-bold text-zinc-100">{study.degree}</h4>
+                    <p className="text-lg text-zinc-300 font-semibold">{study.org}</p>
+                    <p className="text-sm text-zinc-500">{study.location}</p>
+                  </div>
+                  <span className="text-zinc-400 mt-2 md:mt-0 text-sm tracking-wider bg-white/5 px-4 py-2 rounded-full font-medium w-fit">
+                    {study.time}
+                  </span>
+                </div>
+
+                <ul className="space-y-2">
+                  {study.highlights.map((h) => (
+                    <li key={h} className="flex items-start gap-3 text-sm text-zinc-400">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400/80" />
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="gradient-divider-glow" />
+
+      {/* Skills */}
+      <section id="skills" className="py-32 px-6 glow-section-mixed">
+        <div className="max-w-6xl mx-auto">
+          <div className={`text-center mb-20 ${visibleSections.has("skills") ? "animate-slide-up" : "opacity-0"}`}>
+            <p className="kicker-label text-sm tracking-widest uppercase mb-4 font-semibold">Expertise</p>
+            <h2 className="text-4xl md:text-6xl font-bold section-heading">Technical Skills</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(skills).map(([category, { icon, items }], idx) => (
+              <div
+                key={category}
+                className={`skill-card rounded-xl p-4 shadow-lg ${visibleSections.has("skills") ? "animate-slide-up" : "opacity-0"}`}
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <h3 className="text-sm font-bold mb-3 text-red-400 flex items-center gap-2">
+                  {icon}
+                  {category}
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {items.map((skill) => (
+                    <span key={skill} className="tech-tag px-3 py-1 rounded-md text-xs cursor-default">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="gradient-divider-glow" />
+
+      {/* Contact */}
+      <section id="contact" className="py-32 px-6 relative glow-section">
+        <div className="max-w-4xl mx-auto text-center relative">
+          <div className={`mb-16 ${visibleSections.has("contact") ? "animate-slide-up" : "opacity-0"}`}>
+            <p className="kicker-label text-sm tracking-widest uppercase mb-4 font-semibold">Get In Touch</p>
+            <h2 className="text-4xl md:text-6xl font-bold section-heading mb-6">Let&apos;s Connect</h2>
+            <p className="text-zinc-300 font-bold max-w-xl mx-auto text-lg">
+              Reliable support and practical security improvements.
+            </p>
+          </div>
+
+          <div
+            className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 ${
+              visibleSections.has("contact") ? "animate-slide-up delay-200" : "opacity-0"
+            }`}
+          >
+            <a
+              href="https://www.linkedin.com/in/karthick-ganapathy/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-card flex flex-col items-center justify-center gap-4 p-8 rounded-2xl shadow-lg"
+            >
+              <LinkedinIcon className="contact-icon w-8 h-8" />
+              <span className="text-sm text-zinc-300 font-semibold">LinkedIn</span>
+            </a>
+            <a
+              href="mailto:karthick.ganapathy2104@gmail.com"
+              className="contact-card flex flex-col items-center justify-center gap-4 p-8 rounded-2xl shadow-lg"
+            >
+              <Mail className="contact-icon w-8 h-8" />
+              <span className="text-sm text-zinc-300 font-semibold">Email</span>
+            </a>
+            <a
+              href="https://github.com/KArthick707"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-card flex flex-col items-center justify-center gap-4 p-8 rounded-2xl shadow-lg"
+            >
+              <GithubIcon className="contact-icon w-8 h-8" />
+              <span className="text-sm text-zinc-300 font-semibold">GitHub</span>
+            </a>
+            <a
+              href="https://medium.com/@karthickg070"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-card flex flex-col items-center justify-center gap-4 p-8 rounded-2xl shadow-lg"
+            >
+              <Newspaper className="contact-icon w-8 h-8" />
+              <span className="text-sm text-zinc-300 font-semibold">Medium</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-8 text-center border-t border-red-500/10">
+        <p className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          © {new Date().getFullYear()}{" "}
+          <span className="gradient-red-blue font-semibold">Karthick Ganapathy</span> • Built with Next.js & Tailwind CSS
+        </p>
+      </footer>
     </div>
   );
 }
